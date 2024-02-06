@@ -29,6 +29,7 @@ export class CustomerSupportService {
   }
 
   async update(payload: CustomerSupportAttributes) {
+    console.log("payload.task_id: ", payload.task_id);
     const existData = await this.supabase
       .from("task-customer-support")
       .select("*")

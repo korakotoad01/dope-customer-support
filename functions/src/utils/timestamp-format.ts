@@ -10,7 +10,7 @@ export function timeformat(timestamp: string | number) {
 }
 export function reverseformat(dateString: any) {
   const dateObject = new Date(dateString);
-  return dateObject.getTime(); 
+  return dateObject.getTime();
 }
 
 export function newDate() {

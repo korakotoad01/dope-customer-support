@@ -37,6 +37,7 @@ app.post("/", async (request: Request, response: Response) => {
   try {
     const clickupResponse = await clickupService.createTask(request);
     if (!clickupResponse) response.send("Can't create task");
+    console.log("first: ", clickupResponse);
     const payload = {
       created_at: newDate(),
       update_at: newDate(),
@@ -60,7 +61,9 @@ app.post("/", async (request: Request, response: Response) => {
       task_id: clickupResponse.id,
       type: request.body.type,
     };
+    console.log(payload);
     const res = await customerSupportService.create(payload);
+    console.log(res);
     response.send(res);
   } catch (error) {
     response.status(503).send({

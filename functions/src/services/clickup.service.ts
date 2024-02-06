@@ -16,7 +16,7 @@ export class ClickupService {
           },
         }
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error("Error creating task:", error);
     }
@@ -35,7 +35,7 @@ export class ClickupService {
           },
         }
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error("Error creating task:", error);
     }
@@ -52,7 +52,7 @@ export class ClickupService {
           },
         }
       );
-      return response;
+      return response.data;
     } catch (error) {
       console.error("Error deleteing task:", error);
     }
