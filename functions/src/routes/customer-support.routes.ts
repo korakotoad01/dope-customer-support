@@ -1,68 +1,119 @@
 import express, { Express, Request, Response } from "express";
 import { CustomerSupportService } from "../services/customer-support.service";
 import { ClickupService } from "../services/clickup.service";
+import { newDate, timeformat } from "../utils/timestamp-format";
 const app: Express = express();
 
 const customerSupportService = new CustomerSupportService();
 const clickupService = new ClickupService();
 
-app.get("/", async (response: Response) => {
+app.get("/", async (request: Request, response: Response) => {
   try {
     const res = await customerSupportService.getAll();
-    console.log(res.data);
-    return response.status(200).json(res.data);
+    response.send(res.data);
   } catch (error) {
     console.error("Get data Error: ", error);
-    return response.status(503).json({ status: 503, message: error });
+    response.status(503).send({
+      status: 503,
+      message: error,
+    });
   }
 });
 
-app.get("/:id", async (request: Request, response: Response) => {
+app.get("/task/:taskId", async (request: Request, response: Response) => {
   try {
-    const res = await customerSupportService.getByid(request);
-    return response.status(200).json(res.data);
+    const res = await customerSupportService.getByid(request.params.taskId);
+    response.send(res.data);
   } catch (error) {
     console.error("Get data Error: ", error);
-    return response.status(503).json({ status: 503, message: error });
+    response.status(503).json({
+      status: 503,
+      message: error,
+    });
   }
 });
 
 app.post("/", async (request: Request, response: Response) => {
   try {
     const clickupResponse = await clickupService.createTask(request);
-    if (!clickupResponse) return response.status(200).json("Can't create task");
-    const res = await customerSupportService.create(request,clickupResponse.data);
-    return response.status(200).json(res);
+    if (!clickupResponse) response.send("Can't create task");
+    const payload = {
+      created_at: newDate(),
+      update_at: newDate(),
+      name: clickupResponse.name,
+      description: clickupResponse.description,
+      markdown_description: clickupResponse.markdown_description,
+      assignees: clickupResponse.assignees,
+      tags: clickupResponse.tags,
+      status: clickupResponse.status,
+      priority: clickupResponse.priority,
+      due_date: timeformat(clickupResponse.due_date),
+      due_date_time: clickupResponse.due_date_time,
+      time_estimate: clickupResponse.time_estimate,
+      start_date: timeformat(clickupResponse.start_date),
+      start_date_time: clickupResponse.start_date_time,
+      notify_all: clickupResponse.notify_all,
+      parent: clickupResponse.parent,
+      links_to: clickupResponse.links_to,
+      check_required_custom_fields:
+        clickupResponse.check_required_custom_fields,
+      task_id: clickupResponse.id,
+      type: request.body.type,
+    };
+    const res = await customerSupportService.create(payload);
+    response.send(res);
   } catch (error) {
-    return response.status(503).json({
+    response.status(503).send({
       status: 503,
       message: error,
     });
   }
 });
 
-app.put("/task-id/:taskId", async (request: Request, response: Response) => {
+app.put("/task/:taskId", async (request: Request, response: Response) => {
   try {
     const clickupResponse = await clickupService.updateTask(request);
-    if (!clickupResponse) return response.status(200).json("Can't update task");
-    const res = await customerSupportService.update(request);
-    return response.status(200).json({ res });
+    if (!clickupResponse) response.send("Can't update task");
+    const payload = {
+      update_at: newDate(),
+      name: clickupResponse.name,
+      description: clickupResponse.description,
+      markdown_description: clickupResponse.markdown_description,
+      assignees: clickupResponse.assignees,
+      tags: clickupResponse.tags,
+      status: clickupResponse.status,
+      priority: clickupResponse.priority,
+      due_date: timeformat(clickupResponse.due_date),
+      due_date_time: clickupResponse.due_date_time,
+      time_estimate: clickupResponse.time_estimate,
+      start_date: timeformat(clickupResponse.start_date),
+      start_date_time: clickupResponse.start_date_time,
+      notify_all: clickupResponse.notify_all,
+      parent: clickupResponse.parent,
+      links_to: clickupResponse.links_to,
+      check_required_custom_fields:
+        clickupResponse.check_required_custom_fields,
+      task_id: clickupResponse.id,
+      type: request.body.type,
+    };
+    const res = await customerSupportService.update(payload);
+    response.send({ res });
   } catch (error) {
-    return response.status(503).json({
+    response.status(503).send({
       status: 503,
       message: error,
     });
   }
 });
 
-app.delete("/task-id/:taskId", async (request: Request, response: Response) => {
+app.delete("/task/:taskId", async (request: Request, response: Response) => {
   try {
     const clickupResponse = await clickupService.deleteTask(request);
-    if (!clickupResponse) return response.status(200).json("Can't update task");
+    if (!clickupResponse) response.status(200).json("Can't update task");
     const res = customerSupportService.delete(request);
-    return response.status(200).json({ res });
+    response.status(200).send({ res });
   } catch (error) {
-    return response.status(503).json({
+    response.status(503).send({
       status: 503,
       message: error,
     });

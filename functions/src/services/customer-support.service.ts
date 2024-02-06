@@ -4,7 +4,6 @@ import {
   CustomerSupportAttributes,
   CustomerSupportCreatorAttributes,
 } from "../models/customer-support";
-import { newDate, timeformat } from "../utils/timestamp-format";
 export class CustomerSupportService {
   constructor() {}
 
@@ -15,80 +14,31 @@ export class CustomerSupportService {
   );
 
   async getAll() {
-    return await this.supabase.from("customer-support").select("*");
+    return await this.supabase.from("task-customer-support").select("*");
   }
-  async getByid(request: Request) {
+
+  async getByid(taskId: string) {
     return await this.supabase
       .from("task-customer-support")
       .select("*")
-      .eq("id", request.params.id);
+      .eq("task_id", taskId);
   }
 
-  async create(
-    request: Request,
-    clickupResponse: CustomerSupportCreatorAttributes
-  ) {
-    console.log("clickup response: ", clickupResponse.due_date);
-    const payload: CustomerSupportCreatorAttributes = {
-      created_at: newDate(),
-      update_at: newDate(),
-      name: clickupResponse.name,
-      description: clickupResponse.description,
-      markdown_description: clickupResponse.markdown_description,
-      assignees: clickupResponse.assignees,
-      tags: clickupResponse.tags,
-      status: clickupResponse.status,
-      priority: clickupResponse.priority,
-      due_date: timeformat(clickupResponse.due_date),
-      due_date_time: clickupResponse.due_date_time,
-      time_estimate: clickupResponse.time_estimate,
-      start_date: timeformat(clickupResponse.start_date),
-      start_date_time: clickupResponse.start_date_time,
-      notify_all: clickupResponse.notify_all,
-      parent: clickupResponse.parent,
-      links_to: clickupResponse.links_to,
-      check_required_custom_fields:
-        clickupResponse.check_required_custom_fields,
-      task_id: clickupResponse.id,
-      type: request.body.type,
-    };
+  async create(payload: CustomerSupportCreatorAttributes) {
     return await this.supabase.from("task-customer-support").insert(payload);
   }
 
-  async update(request: Request) {
-    const payload: CustomerSupportAttributes = {
-      // created_at: this.dateNow,
-      update_at: newDate(),
-      name: request.body.name,
-      description: request.body.description,
-      markdown_description: request.body.markdown_description,
-      assignees: request.body.assignees,
-      tags: request.body.tags,
-      status: request.body.status,
-      priority: request.body.priority,
-      due_date: request.body.due_date,
-      due_date_time: request.body.due_dateTime,
-      time_estimate: request.body.time_estimate,
-      start_date: request.body.start_date,
-      start_date_time: request.body.start_date_time,
-      notify_all: request.body.notify_all,
-      parent: request.body.parent,
-      links_to: request.body.links_to,
-      check_required_custom_fields: request.body.check_required_custom_fields,
-      task_id: request.body.id,
-      type:  request.body.type,
-    };
-
+  async update(payload: CustomerSupportAttributes) {
     const existData = await this.supabase
       .from("task-customer-support")
       .select("*")
-      .eq("task_id", request.params.taskId);
+      .eq("task_id", payload.task_id);
 
     if (existData.data) {
       return await this.supabase
         .from("task-customer-support")
         .update(payload)
-        .eq("task_id", request.params.taskId);
+        .eq("task_id", payload.task_id);
     } else {
       return {
         status: 503,
